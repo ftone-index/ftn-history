@@ -1,0 +1,40 @@
+name: Log FTN Daily Reading
+
+on:
+  schedule:
+    - cron: '0 */6 * * *'   # every 6 hours
+  workflow_dispatch:        # allows manual trigger
+
+jobs:
+  log:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write       # needed to push the updated CSV
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Fetch FTN API
+        id: fetch
+        run: |
+          RESPONSE=$(curl -s https://ftn-index.onrender.com/api/ftn_latest)
+          echo "API response: $RESPONSE"
+          
+          TIMESTAMP=$(echo "$RESPONSE" | jq -r '.timestamp')
+          SCORE=$(echo "$RESPONSE" | jq -r '.score')
+          RAW_SCORE=$(echo "$RESPONSE" | jq -r '.raw_score')
+          CHANGE=$(echo "$RESPONSE" | jq -r '.change')
+          CONFIDENCE=$(echo "$RESPONSE" | jq -r '.confidence')
+          SOURCES_COUNT=$(echo "$RESPONSE" | jq -r '.sources | length')
+          PROVIDER="API"
+          
+          echo "${TIMESTAMP},${SCORE},${RAW_SCORE},${CHANGE},${CONFIDENCE},${SOURCES_COUNT},${PROVIDER}" >> ftn_log.csv
+          echo "Appended: ${TIMESTAMP},${SCORE},${RAW_SCORE},${CHANGE},${CONFIDENCE},${SOURCES_COUNT},${PROVIDER}"
+
+      - name: Commit and push if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add ftn_log.csv
+          git diff --staged --quiet || (git commit -m "Add FTN reading for $(date +%Y-%m-%d)" && git push)
