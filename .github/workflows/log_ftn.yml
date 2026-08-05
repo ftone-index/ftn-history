@@ -18,7 +18,7 @@ jobs:
       - name: Fetch FTN API
         id: fetch
         run: |
-          RESPONSE=$(curl -s https://ftn-index.onrender.com/api/ftn_latest)
+          RESPONSE=$(curl -s --max-time 120 --retry 2 --retry-delay 30 https://ftn-index.onrender.com/api/ftn_latest)
           echo "API response: $RESPONSE"
           
           TIMESTAMP=$(echo "$RESPONSE" | jq -r '.timestamp')
