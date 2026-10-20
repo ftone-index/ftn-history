@@ -80,8 +80,13 @@
     "sovereign": 60.4
   },
   "2026-10-19": {
-    "fci": 52.4,
-    "market": 45.8,
-    "sovereign": 59.8
+    "fci": 52.2,
+    "market": 45.7,
+    "sovereign": 59.3
+  },
+  "2026-10-20": {
+    "fci": 52.2,
+    "market": 45.6,
+    "sovereign": 59.3
   }
 }
